@@ -127,7 +127,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                 $name = explode(" ", trim($temp[1]));
                 //var_dump($name);
 
-                if($name[1] !== "Jr.," && $name[1] !== "Jr,") {
+                if($name[1] !== "Jr.," && $name[1] !== "Jr," || $name[1] !== "-") {
                     $array[$i]['name'] = trim($name[1]) . " " . str_replace(",", "", trim($name[0]));
                 }else{
                     $array[$i]['name'] = str_replace(",", "", trim($name[2])) . " " . str_replace(",", "", trim($name[0]));
@@ -142,9 +142,9 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
             //var_dump((int) $array[$i]['empid']);
             if((int)$array[$i]['empid'] > 0) {
 
-                $output[] = array($array[$i]['empid'], $array[$i]['name'], "", "", "", "E", "01", "", $array[$i]['hours'], "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+                $output[] = array($array[$i]['empid'], /*$array[$i]['name']*/ "", "", "", "", "E", "01", "", $array[$i]['hours'], "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
                 if (array_key_exists('overtime', $array[$i])) {
-                    $output[] = array($array[$i]['empid'], $array[$i]['name'], "", "", "", "E", "02", "", (string)$array[$i]['overtime'], "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+                    $output[] = array($array[$i]['empid'], /*$array[$i]['name']*/ "", "", "", "", "E", "02", "", (string)$array[$i]['overtime'], "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
                 }
 
             }else{

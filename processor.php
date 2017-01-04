@@ -127,8 +127,10 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                 $name = explode(" ", trim($temp[1]));
                 //var_dump($name);
 
-                if($name[1] !== "Jr.," && $name[1] !== "Jr," || $name[1] !== "-") {
+                if($name[1] !== "Jr.," && $name[1] !== "Jr," && $name[1] !== "-") {
                     $array[$i]['name'] = trim($name[1]) . " " . str_replace(",", "", trim($name[0]));
+                }else if($name[1] === "-"){
+                    $array[$i]['name'] = str_replace(",", "", trim($name[3])) . " " . trim($name[0]). "-". str_replace(",", "", trim($name[2]));
                 }else{
                     $array[$i]['name'] = str_replace(",", "", trim($name[2])) . " " . str_replace(",", "", trim($name[0]));
                 }

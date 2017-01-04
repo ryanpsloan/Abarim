@@ -111,7 +111,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
             if($val['tag'] === 'TBLWORKERACTIVITY_GROUP4' && $val['level'] === 8 && $val['type'] === 'open'){
                 $array[$i]['hours'] = preg_replace("/:/",".", $val['attributes']['TEXTBOX17']);
                 if((float) $array[$i]['hours'] > 40){
-                    $array[$i]['overtime'] = $array[$i]['hours'] - 40;
+                    $array[$i]['overtime'] = number_format($array[$i]['hours'] - 40, 2);
                     $array[$i]['hours'] = "40";
                 }
 
@@ -142,26 +142,23 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
             //var_dump((int) $array[$i]['empid']);
             if((int)$array[$i]['empid'] > 0) {
 
-                $output[] = array($array[$i]['empid'], $array[$i]['name'], "", "", "", "E", "01", "", $array[$i]['hours'], "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1");
+                $output[] = array($array[$i]['empid'], $array[$i]['name'], "", "", "", "E", "01", "", $array[$i]['hours'], "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
                 if (array_key_exists('overtime', $array[$i])) {
-                    $output[] = array($array[$i]['empid'], $array[$i]['name'], "", "", "", "E", "02", "", (string)$array[$i]['overtime'], "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1");
+                    $output[] = array($array[$i]['empid'], $array[$i]['name'], "", "", "", "E", "02", "", (string)$array[$i]['overtime'], "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
                 }
 
             }else{
-                $exceptions[] = array($array[$i]['name'], "Employee Id is not an Integer or is Blank", "ID Value: " . $array[$i]['empid']);
-                $exceptions[] = array($array[$i]['empid'], $array[$i]['name'], "", "", "", "E", "01", "", $array[$i]['hours'], "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1");
-                if (array_key_exists('overtime', $array[$i])) {
-                    $exceptions[] = array($array[$i]['empid'], $array[$i]['name'], "", "", "", "E", "02", "", (string)$array[$i]['overtime'], "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1");
-                }
+                $exceptions[] = array($array[$i]['name'], "Employee Id is not an Integer or is Blank", "ID Value: " . $array[$i]['empid'], "Total Hours: " . $array[$i]['hours'],  array_key_exists('overtime', $array[$i])  ? "Overtime: " . $array[$i]['overtime'] : "");
+
             }
         }
 
-        $fileName = "EvoFiles/Abarim_Evo_File-" . $month . "-" . $day . "-" . $year . ".txt";
+        $fileName = "EvoFiles/Abarim_Evo_File-" . $month . "-" . $day . "-" . $year . ".csv";
         $handle = fopen($fileName, 'wb');
         //create a .txt from updated original fileData
         foreach($output as $line){
             fputcsv($handle, $line);
-            fwrite($handle, "\r\n");
+
         }
 
         fclose($handle);
@@ -169,12 +166,12 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
 
 
         if(count($exceptions) > 0) {
-            $exFileName = "ExceptionFiles/Abarim_Exception_File-" . $month . "-" . $day . "-" . $year . ".txt";
+            $exFileName = "ExceptionFiles/Abarim_Exception_File-" . $month . "-" . $day . "-" . $year . ".csv";
             $handle = fopen($exFileName, 'wb');
             //create a .txt from updated original fileData
             foreach ($exceptions as $line) {
                 fputcsv($handle, $line);
-                fwrite($handle, "\r\n");
+
             }
 
             fclose($handle);
@@ -188,10 +185,10 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
 
     } catch (Exception $e) {
         $_SESSION['output'] = $e->getMessage();
-        //header('Location: format.php?');
+        header('Location: index.php');
     }
 }else{
     $_SESSION['output'] = "<p>No File Was Selected</p>";
-    //header('Location: format.php');
+    header('Location: index.php');
 }
 ?>

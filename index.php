@@ -68,6 +68,15 @@ session_start();
                 echo "<a href='clear.php'>Clear Files</a><br>"; }?></div>
         <div><?php if(isset($_SESSION['exceptionFile'])){ echo "<a href='exceptionDownload.php'>Download Exceptions</a>";} ?></div>
         </div>
+        <?php if(isset($_SESSION['count'])){
+            echo "<div class='col-xs-4'></div><div class='col-xs-4' style='border: 1px solid black; margin-top: 5px; padding: 15px;'>
+                <p>" . $_SESSION['originalFileName'] . "</p>
+                <hr>
+                <p>Employee Count: " . $_SESSION['count'] . "</p>
+                <p>Total Regular: " . number_format($_SESSION['hours'],2) . "</p>
+                <p>Total Overtime: " . number_format($_SESSION['overtime'],2). "</p>
+            </div><div class='col-xs-4'></div>";
+        } ?>
     </div>
 </main>
 </body>

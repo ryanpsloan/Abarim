@@ -21,6 +21,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
         fwrite($log, "--------------------------------------------------------------------------------" . PHP_EOL); //post to log
 
         $name = $_FILES['file']['name']; //get file name
+        $_SESSION['originalFileName'] = $name;
         fwrite($log, "FileName: $name" . PHP_EOL); //write to log
         $type = $_FILES["file"]["type"];//get file type
         fwrite($log, "FileType: $type" . PHP_EOL); //write to log
@@ -105,52 +106,112 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
 
         xml_parser_free($p);
         //var_dump($values);
+        $hours = $overtime = 0;
         $array = array();
         $i = 0;
-        foreach($values as $key => $val){
-            if($val['tag'] === 'TBLWORKERACTIVITY_GROUP4' && $val['level'] === 8 && $val['type'] === 'open'){
-                $array[$i]['hours'] = preg_replace("/:/",".", $val['attributes']['TEXTBOX17']);
-                if((float) $array[$i]['hours'] > 40){
-                    $array[$i]['overtime'] = number_format($array[$i]['hours'] - 40, 2);
-                    $array[$i]['hours'] = "40";
+        if(strpos($values[0]['attributes']['TEXTBOX119'], "SF") === false) {
+            foreach ($values as $key => $val) {
+                if ($val['tag'] === 'TBLWORKERACTIVITY_GROUP4' && $val['level'] === 8 && $val['type'] === 'open') {
+                    $time = explode(":", $val['attributes']['TEXTBOX17']);
+                    $hrs = $time[0];
+                    $min = $time[1] * (1/60);
+                    //var_dump($time);
+                    $array[$i]['hours'] = number_format($hrs + $min,2);
+                    //echo($array[$i]['hours']) .  "<br>";
+                }
+                if ($val['tag'] === 'WORKERGROUP' && $val['level'] === 12 && $val['type'] === 'open') {
+                    $id = explode(":", $val['attributes']['TEXTBOX21']);
+                    //var_dump($id);
+                    $array[$i]['empid'] = trim($id[1]);
+
+                }
+                if ($val['tag'] === 'TBLHEADINGGROUPING' && $val['level'] === 14 && $val['type'] === 'open') {
+                    $temp = explode(":", $val['attributes']['TEXTBOX10']);
+                    $name = explode(" ", trim($temp[1]));
+                    //var_dump($name);
+
+                    if ($name[1] !== "Jr.," && $name[1] !== "Jr," && $name[1] !== "-") {
+                        $array[$i]['name'] = trim($name[1]) . " " . str_replace(",", "", trim($name[0]));
+                    } else if ($name[1] === "-") {
+                        $array[$i]['name'] = str_replace(",", "", trim($name[3])) . " " . trim($name[0]) . "-" . str_replace(",", "", trim($name[2]));
+                    } else {
+                        $array[$i]['name'] = str_replace(",", "", trim($name[2])) . " " . str_replace(",", "", trim($name[0]));
+                    }
+                    $i++;
                 }
 
             }
-            if($val['tag'] === 'WORKERGROUP' && $val['level'] === 12 && $val['type'] === 'open'){
-                $id = explode(":", $val['attributes']['TEXTBOX21']);
-                //var_dump($id);
-                $array[$i]['empid'] = trim($id[1]);
+        }else{
+            foreach ($values as $key => $val) {
+                if ($val['tag'] === 'TBLWORKERACTIVITY_GROUP5' && $val['level'] === 10 && $val['type'] === 'open') {
+                    $time = explode(":", $val['attributes']['TEXTBOX9']);
+                    $hrs = $time[0];
+                    $min = $time[1] * (1/60);
+                    //var_dump($time);
+                    $array[$i]['hours'] = number_format($hrs + $min,2);
+                    //echo($array[$i]['hours']) .  "<br>";
 
-            }
-            if($val['tag'] === 'TBLHEADINGGROUPING' && $val['level'] === 14 && $val['type'] === 'open'){
-                $temp = explode(":", $val['attributes']['TEXTBOX10']);
-                $name = explode(" ", trim($temp[1]));
-                //var_dump($name);
-
-                if($name[1] !== "Jr.," && $name[1] !== "Jr," && $name[1] !== "-") {
-                    $array[$i]['name'] = trim($name[1]) . " " . str_replace(",", "", trim($name[0]));
-                }else if($name[1] === "-"){
-                    $array[$i]['name'] = str_replace(",", "", trim($name[3])) . " " . trim($name[0]). "-". str_replace(",", "", trim($name[2]));
-                }else{
-                    $array[$i]['name'] = str_replace(",", "", trim($name[2])) . " " . str_replace(",", "", trim($name[0]));
                 }
-                $i++;
-            }
+                if ($val['tag'] === 'WORKERGROUP' && $val['level'] === 14 && $val['type'] === 'open') {
+                    $id = explode(":", $val['attributes']['TEXTBOX33']);
+                    //var_dump($id);
+                    $array[$i]['empid'] = trim($id[1]);
 
+                }
+                if ($val['tag'] === 'TBLHEADINGGROUPING' && $val['level'] === 16 && $val['type'] === 'open') {
+                    $temp = explode(":", $val['attributes']['TEXTBOX12']);
+                    $name = explode(" ", trim($temp[1]));
+                    //var_dump($name);
+
+                    if ($name[1] !== "Jr.," && $name[1] !== "Jr," && $name[1] !== "-") {
+                        $array[$i]['name'] = trim($name[1]) . " " . str_replace(",", "", trim($name[0]));
+                    } else if ($name[1] === "-") {
+                        $array[$i]['name'] = str_replace(",", "", trim($name[3])) . " " . trim($name[0]) . "-" . str_replace(",", "", trim($name[2]));
+                    } else {
+                        $array[$i]['name'] = str_replace(",", "", trim($name[2])) . " " . str_replace(",", "", trim($name[0]));
+                    }
+                    $i++;
+                }
+
+            }
         }
         //var_dump($array);
-        $output = $exceptions = array();
-        for($i = 0; $i < count($array); $i++){
-            //var_dump((int) $array[$i]['empid']);
-            if((int)$array[$i]['empid'] > 0) {
+        $newArr = array();
+        foreach($array as $arr){
+            $newArr[$arr['name']]['hours'] = 0;
+        }
+        //var_dump($newArr);
+        foreach($array as $arr){
+            $newArr[$arr['name']]['empid'] = $arr['empid'];
+            $newArr[$arr['name']]['hours'] += (float) $arr['hours'];
 
-                $output[] = array($array[$i]['empid'], /*$array[$i]['name']*/ "", "", "", "", "E", "01", "", $array[$i]['hours'], "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
-                if (array_key_exists('overtime', $array[$i])) {
-                    $output[] = array($array[$i]['empid'], /*$array[$i]['name']*/ "", "", "", "", "E", "02", "", (string)$array[$i]['overtime'], "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+        }
+
+        foreach($newArr as $key => $nArray){
+            if ($nArray['hours'] > 40) {
+                $newArr[$key]['overtime'] = $nArray['hours'] - 40;
+                $newArr[$key]['hours'] = 40;
+                $overtime += $nArray['hours'] - 40;
+                $hours += 40;
+            } else {
+                $hours += $nArray['hours'];
+            }
+            //echo $nArray['hours'] ."<br>";
+        }
+        //var_dump($newArr);
+        $count = count($newArr);
+        $output = $exceptions = array();
+        foreach($newArr as $key => $nArray){
+            //var_dump((int) $nArray['empid']);
+            if((int)$nArray['empid'] > 0) {
+
+                $output[] = array($nArray['empid'], /*$key*/ "", "", "", "", "E", "01", "", (string) $nArray['hours'], "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+                if (array_key_exists('overtime', $nArray)) {
+                    $output[] = array($nArray['empid'], /*$key*/ "", "", "", "", "E", "02", "", $nArray['overtime'], "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
                 }
 
             }else{
-                $exceptions[] = array($array[$i]['name'], "Employee Id is not an Integer or is Blank", "ID Value: " . $array[$i]['empid'], "Total Hours: " . $array[$i]['hours'],  array_key_exists('overtime', $array[$i])  ? "Overtime: " . $array[$i]['overtime'] : "");
+                $exceptions[] = array($key, "Employee Id is not an Integer or is Blank", "ID Value: " . $nArray['empid'], "Total Hours: " . (string) $nArray['hours'],  array_key_exists('overtime', $nArray)  ? "Overtime: " . (string) $nArray['overtime'] : "");
 
             }
         }
@@ -183,6 +244,10 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
 
 
         $_SESSION['output'] = "Files Successfully Created";
+        $_SESSION['count'] = $count;
+        $_SESSION['overtime'] = $overtime;
+        $_SESSION['hours'] = $hours;
+
         header("Location: index.php");
 
     } catch (Exception $e) {

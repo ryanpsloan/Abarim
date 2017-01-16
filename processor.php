@@ -109,7 +109,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
         $hours = $overtime = 0;
         $array = array();
         $i = 0;
-        if(strpos($values[0]['attributes']['TEXTBOX119'], "SF") === false) {
+        //if(strpos($values[0]['attributes']['TEXTBOX119'], "SF") === false) {
             foreach ($values as $key => $val) {
                 if ($val['tag'] === 'TBLWORKERACTIVITY_GROUP4' && $val['level'] === 8 && $val['type'] === 'open') {
                     $time = explode(":", $val['attributes']['TEXTBOX17']);
@@ -141,7 +141,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                 }
 
             }
-        }else{
+        /*}else{
             foreach ($values as $key => $val) {
                 if ($val['tag'] === 'TBLWORKERACTIVITY_GROUP5' && $val['level'] === 10 && $val['type'] === 'open') {
                     $time = explode(":", $val['attributes']['TEXTBOX9']);
@@ -174,7 +174,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                 }
 
             }
-        }
+        }*/
         //var_dump($array);
         $newArr = array();
         foreach($array as $arr){

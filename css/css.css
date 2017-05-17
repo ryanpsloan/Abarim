@@ -1,20 +1,3 @@
-div{
-    text-align:center;
-}
-
-#viewEmployeesTable, #viewJobsTable{
-    margin: 0 auto;
-
-}
-
-#viewEmployeesTable, #viewEmployeesTable tr, #viewEmployeesTable td, #viewJobsTable, #viewJobsTable tr, #viewJobsTable td{
-    border: 2px solid lightgrey;
-}
-
-#fileUpload{
-    margin: 5px auto;
-}
-
 hr{
     border-color: blue;
 }

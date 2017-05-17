@@ -109,105 +109,147 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
         $hours = $overtime = 0;
         $array = array();
         $i = 0;
-        //if(strpos($values[0]['attributes']['TEXTBOX119'], "SF") === false) {
-            foreach ($values as $key => $val) {
-                if ($val['tag'] === 'TBLWORKERACTIVITY_GROUP4' && $val['level'] === 8 && $val['type'] === 'open') {
-                    $time = explode(":", $val['attributes']['TEXTBOX17']);
-                    $hrs = $time[0];
-                    $min = $time[1] * (1/60);
-                    //var_dump($time);
-                    $array[$i]['hours'] = number_format($hrs + $min,2);
-                    //echo($array[$i]['hours']) .  "<br>";
-                }
-                if ($val['tag'] === 'WORKERGROUP' && $val['level'] === 12 && $val['type'] === 'open') {
-                    $id = explode(":", $val['attributes']['TEXTBOX21']);
-                    //var_dump($id);
-                    $array[$i]['empid'] = trim($id[1]);
 
-                }
-                if ($val['tag'] === 'TBLHEADINGGROUPING' && $val['level'] === 14 && $val['type'] === 'open') {
-                    $temp = explode(":", $val['attributes']['TEXTBOX10']);
-                    $name = explode(" ", trim($temp[1]));
-                    //var_dump($name);
+        if(isset($_POST['location'])){
+            $location = $_POST['location'];
 
-                    if ($name[1] !== "Jr.," && $name[1] !== "Jr," && $name[1] !== "-") {
-                        $array[$i]['name'] = trim($name[1]) . " " . str_replace(",", "", trim($name[0]));
-                    } else if ($name[1] === "-") {
-                        $array[$i]['name'] = str_replace(",", "", trim($name[3])) . " " . trim($name[0]) . "-" . str_replace(",", "", trim($name[2]));
-                    } else {
-                        $array[$i]['name'] = str_replace(",", "", trim($name[2])) . " " . str_replace(",", "", trim($name[0]));
+        }else{
+            throw(new Exception("The file location for the file was not set. Use the radio buttons to select the location of the file as they use different formats."));
+        }
+
+        if($location != '') {
+            if(strpos($values[0]['attributes']['TEXTBOX119'], 'SF') !== false || strpos($values[0]['attributes']['TEXTBOX119'], 'LL') !== false || strpos($values[0]['attributes']['TEXTBOX119'], 'ABQ') !== false || strpos($values[0]['attributes']['TEXTBOX119'], 'SOC') !== false) {
+                foreach ($values as $key => $val) {
+                    if ($val['tag'] === 'TBLWORKERACTIVITY_GROUP4' && $val['level'] === 8 && $val['type'] === 'open') {
+                        $time = explode(":", $val['attributes']['TEXTBOX17']);
+                        $hrs = $time[0];
+                        $min = $time[1] * (1 / 60);
+
+                        $array[$i]['hours'] = number_format($hrs + $min, 2);
+
                     }
-                    $i++;
-                }
+                    if ($val['tag'] === 'WORKERGROUP' && $val['level'] === 12 && $val['type'] === 'open') {
+                        $id = explode(":", $val['attributes']['TEXTBOX21']);
+                        //var_dump($id);
+                        $array[$i]['empid'] = trim($id[1]);
 
-            }
-        /*}else{
-            foreach ($values as $key => $val) {
-                if ($val['tag'] === 'TBLWORKERACTIVITY_GROUP5' && $val['level'] === 10 && $val['type'] === 'open') {
-                    $time = explode(":", $val['attributes']['TEXTBOX9']);
-                    $hrs = $time[0];
-                    $min = $time[1] * (1/60);
-                    //var_dump($time);
-                    $array[$i]['hours'] = number_format($hrs + $min,2);
-                    //echo($array[$i]['hours']) .  "<br>";
-
-                }
-                if ($val['tag'] === 'WORKERGROUP' && $val['level'] === 14 && $val['type'] === 'open') {
-                    $id = explode(":", $val['attributes']['TEXTBOX33']);
-                    //var_dump($id);
-                    $array[$i]['empid'] = trim($id[1]);
-
-                }
-                if ($val['tag'] === 'TBLHEADINGGROUPING' && $val['level'] === 16 && $val['type'] === 'open') {
-                    $temp = explode(":", $val['attributes']['TEXTBOX12']);
-                    $name = explode(" ", trim($temp[1]));
-                    //var_dump($name);
-
-                    if ($name[1] !== "Jr.," && $name[1] !== "Jr," && $name[1] !== "-") {
-                        $array[$i]['name'] = trim($name[1]) . " " . str_replace(",", "", trim($name[0]));
-                    } else if ($name[1] === "-") {
-                        $array[$i]['name'] = str_replace(",", "", trim($name[3])) . " " . trim($name[0]) . "-" . str_replace(",", "", trim($name[2]));
-                    } else {
-                        $array[$i]['name'] = str_replace(",", "", trim($name[2])) . " " . str_replace(",", "", trim($name[0]));
                     }
-                    $i++;
-                }
+                    if ($val['tag'] === 'TBLHEADINGGROUPING' && $val['level'] === 14 && $val['type'] === 'open') {
+                        $temp = explode(":", $val['attributes']['TEXTBOX10']);
+                        $name = explode(",", trim($temp[1]));
+                        //var_dump($name);
 
+                        $array[$i]['name'] = trim($name[1]) . " " . trim($name[0]);
+
+                        $i++;
+                    }
+
+                }
+            }else{
+                throw(new Exception("The Location selected via Radio button and the file location do not match."));
             }
-        }*/
+        }else{
+            throw(new Exception("No Location was selected via Radio button."));
+        }/*elseif($location === 'ABQ'){
+            if(strpos($values[0]['attributes']['TEXTBOX119'], 'ABQ') !== false) {
+
+                foreach ($values as $key => $val) {
+                    if ($val['tag'] === 'TBLWORKERACTIVITY_GROUP5' && $val['level'] === 10 && $val['type'] === 'open') {
+                        $time = explode(":", $val['attributes']['TEXTBOX9']);
+                        $hrs = $time[0];
+                        $min = $time[1] * (1 / 60);
+
+                        $array[$i]['hours'] = number_format($hrs + $min, 2);
+                    }
+                    if ($val['tag'] === 'WORKERGROUP' && $val['level'] === 14 && $val['type'] === 'open') {
+                        $id = explode(":", $val['attributes']['TEXTBOX33']);
+                        //var_dump($id);
+                        $array[$i]['empid'] = trim($id[1]);
+
+                    }
+                    if ($val['tag'] === 'TBLHEADINGGROUPING' && $val['level'] === 16 && $val['type'] === 'open') {
+                        $temp = explode(":", $val['attributes']['TEXTBOX12']);
+                        $name = explode(" ", trim($temp[1]));
+                        //var_dump($name);
+                        $array[$i]['name'] = trim($name[1]) . " " . trim($name[0]);
+                        $i++;
+                    }
+                }
+            }else{
+                throw(new Exception("The location selected via Radio button and the file location do not match"));
+            }
+
+        }else if($location === 'SOC'){
+            if(strpos($values[0]['attributes']['TEXTBOX119'], 'SOC') !== false){
+                foreach ($values as $key => $val) {
+                    if ($val['tag'] === 'TBLWORKERACTIVITY_GROUP5' && $val['level'] === 8 && $val['type'] === 'open') {
+                        $time = explode(":", $val['attributes']['TEXTBOX9']);
+                        $hrs = $time[0];
+                        $min = $time[1] * (1 / 60);
+
+                        $array[$i]['hours'] = number_format($hrs + $min, 2);
+                        $array[$i]['empid'] = '1111';
+                        $assigned = false;
+                    }
+                    /*if ($val['tag'] === 'WORKERGROUP' && $val['level'] === 14 && $val['type'] === 'open') {
+                        $id = explode(":", $val['attributes']['TEXTBOX33']);
+                        //var_dump($id);
+                        $array[$i]['empid'] = trim($id[1]);
+
+                    }*/
+                    /*if ($val['tag'] === 'TBLHEADINGGROUPING' && $val['level'] === 16 && $val['type'] === 'open') {
+                        $temp = explode(":", $val['attributes']['TEXTBOX12']);
+                        $name = explode(" ", trim($temp[1]));
+                        //var_dump($name);
+                        $array[$i]['name'] = trim($name[1]) . " " . trim($name[0]);
+                        $i++;
+                    }
+                    if ($val['tag'] === 'DETAIL' && $val['level'] === 16 && $val['type'] === 'complete' && $assigned === false) {
+                        $name = explode(",", trim($val['attributes']['TEXTBOX1']));
+                        $assigned = true;
+                        //var_dump($name);
+                        $array[$i]['name'] = trim($name[1]) . " " . trim($name[0]);
+                        $i++;
+                    }
+
+                }
+            }*/
+        //}
+
+
         //var_dump($array);
         $newArr = array();
         foreach($array as $arr){
             $newArr[$arr['name']]['hours'] = 0;
         }
-        //var_dump($newArr);
+
         foreach($array as $arr){
             $newArr[$arr['name']]['empid'] = $arr['empid'];
             $newArr[$arr['name']]['hours'] += (float) $arr['hours'];
 
         }
-
+        //var_dump($newArr);
         foreach($newArr as $key => $nArray){
             if ($nArray['hours'] > 40) {
                 $newArr[$key]['overtime'] = $nArray['hours'] - 40;
                 $newArr[$key]['hours'] = 40;
-                $overtime += $nArray['hours'] - 40;
+                $overtime +=$nArray['hours'] - 40;
                 $hours += 40;
             } else {
                 $hours += $nArray['hours'];
             }
-            //echo $nArray['hours'] ."<br>";
+
         }
         //var_dump($newArr);
         $count = count($newArr);
         $output = $exceptions = array();
         foreach($newArr as $key => $nArray){
-            //var_dump((int) $nArray['empid']);
+
             if((int)$nArray['empid'] > 0) {
 
-                $output[] = array($nArray['empid'], /*$key*/ "", "", "", "", "E", "01", "", (string) $nArray['hours'], "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+                $output[] = array($nArray['empid'], ""/*ucwords(strtolower($key))*/, "", "", "", "E", "01", "", (string) $nArray['hours'], "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
                 if (array_key_exists('overtime', $nArray)) {
-                    $output[] = array($nArray['empid'], /*$key*/ "", "", "", "", "E", "02", "", $nArray['overtime'], "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+                    $output[] = array($nArray['empid'], ""/*ucwords(strtolower($key))*/, "", "", "", "E", "02", "", round($nArray['overtime'],2), "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
                 }
 
             }else{
@@ -216,7 +258,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
             }
         }
 
-        $fileName = "EvoFiles/Abarim_Evo_File-" . $month . "-" . $day . "-" . $year . ".csv";
+        $fileName = "EvoFiles/Abarim_Evo_File-".$location."-" . $month . "-" . $day . "-" . $year . "-" . $today->format("h-i-s"). ".csv";
         $handle = fopen($fileName, 'wb');
         //create a .txt from updated original fileData
         foreach($output as $line){
@@ -229,7 +271,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
 
 
         if(count($exceptions) > 0) {
-            $exFileName = "ExceptionFiles/Abarim_Exception_File-" . $month . "-" . $day . "-" . $year . ".csv";
+            $exFileName = "ExceptionFiles/Abarim_Exception_File-" .$location."-". $month . "-" . $day . "-" . $year ."-" . $today->format("h-i-s"). ".csv";
             $handle = fopen($exFileName, 'wb');
             //create a .txt from updated original fileData
             foreach ($exceptions as $line) {
@@ -245,7 +287,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
 
         $_SESSION['output'] = "Files Successfully Created";
         $_SESSION['count'] = $count;
-        $_SESSION['overtime'] = $overtime;
+        $_SESSION['overtime'] = round($overtime,2);
         $_SESSION['hours'] = $hours;
 
         header("Location: index.php");

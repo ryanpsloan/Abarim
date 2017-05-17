@@ -50,14 +50,21 @@ session_start();
 <main>
 
     <div class="container-fluid">
-        <div class="row center">
+        <div class="row">
             <p>Upload .xml only</p>
             <form action="processor.php" method="POST" enctype="multipart/form-data">
                 <table id="fileUpload" class="border">
-
                     <tr><td><label for="file">Abarim File Upload</label></td></tr>
+                    <tr><td><hr></td></tr>
+                    <tr><td><input type="radio" name="location" value="SF"><span>Santa Fe</span></td></tr>
+
+                    <tr><td><input type="radio" name="location" value="ABQ"><span>Albuqueruqe</span></td></tr>
+                    <tr><td><input type="radio" name="location" value="LL"><span>Los Lunas</span></td></tr>
+                    <tr><td><input type="radio" name="location" value="SOC"><span>Socorro</span></td></tr>
+
                     <tr><td><input type="file" id="file" name="file"></td></tr>
                     <tr><td><hr/></td></tr>
+
                     <tr><td><input type="submit" value="Process File" id="submit" name="submit"></td></tr>
                 </table>
             </form>

@@ -8,7 +8,7 @@ ryan@paydayinc.com
 
 session_start();
 //var_dump($_FILES);
-//includes
+//var_dump($_POST);
 if(isset($_FILES)) { //Check to see if a file is uploaded
     try {
         if (($log = fopen("log.txt", "w")) === false) { //open a log file
@@ -110,6 +110,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
         $array = array();
         $i = 0;
 
+        //var_dump($_POST['location']);
         if(isset($_POST['location'])){
             $location = $_POST['location'];
 
@@ -118,8 +119,34 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
         }
 
         if($location != '') {
-            if(strpos($values[0]['attributes']['TEXTBOX119'], 'SF') !== false || strpos($values[0]['attributes']['TEXTBOX119'], 'LL') !== false || strpos($values[0]['attributes']['TEXTBOX119'], 'ABQ') !== false || strpos($values[0]['attributes']['TEXTBOX119'], 'SOC') !== false) {
-                foreach ($values as $key => $val) {
+            //if(strpos($values[0]['attributes']['TEXTBOX119'], 'SF') !== false || strpos($values[0]['attributes']['TEXTBOX119'], 'LL') !== false || strpos($values[0]['attributes']['TEXTBOX119'], 'ABQ') !== false || strpos($values[0]['attributes']['TEXTBOX119'], 'SOC') !== false) {
+            foreach($values as $key => $val){
+                if ($val['tag'] === 'TBLWORKERACTIVITY_GROUP4' && $val['level'] === 8 && $val['type'] === 'open') {
+                    $time = explode(":", $val['attributes']['WORKERTIMEWORKEDTOTAL']);
+                    $hrs = $time[0];
+                    $min = $time[1] * (1 / 60);
+
+                    $array[$i]['hours'] = number_format($hrs + $min, 2);
+
+                }
+                if ($val['tag'] === 'WORKERGROUP' && $val['level'] === 12 && $val['type'] === 'open') {
+                    $id = explode(":", $val['attributes']['EXTERNALWORKERIDTITLE']);
+                    //var_dump($id);
+                    $array[$i]['empid'] = trim($id[1]);
+
+                }
+                if ($val['tag'] === 'TBLHEADINGGROUPING' && $val['level'] === 14 && $val['type'] === 'open') {
+                    $temp = explode(":", $val['attributes']['WORKERNAMETITLE']);
+                    $name = explode(",", trim($temp[1]));
+                    //var_dump($name);
+
+                    $array[$i]['name'] = trim($name[1]) . " " . trim($name[0]);
+
+                    $i++;
+                }
+            }
+
+            /*foreach ($values as $key => $val) {
                     if ($val['tag'] === 'TBLWORKERACTIVITY_GROUP4' && $val['level'] === 8 && $val['type'] === 'open') {
                         $time = explode(":", $val['attributes']['TEXTBOX17']);
                         $hrs = $time[0];
@@ -145,9 +172,9 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                     }
 
                 }
-            }else{
+            /*}else{
                 throw(new Exception("The Location selected via Radio button and the file location do not match."));
-            }
+            }*/
         }else{
             throw(new Exception("No Location was selected via Radio button."));
         }/*elseif($location === 'ABQ'){
